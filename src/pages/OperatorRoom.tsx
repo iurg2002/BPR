@@ -1,4 +1,3 @@
-// src/pages/OperatorRoom.tsx
 import React, { useEffect, useState } from "react";
 import { getOrders } from "../services/orderService";
 import { Order } from "../models/Order";
