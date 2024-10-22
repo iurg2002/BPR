@@ -8,6 +8,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 interface DataContextType {
   users: User[];
+  currentUser: User | null;
   orders: Order[];
   currentUserRole: "admin" | "operator" | null;
   loading: boolean;
@@ -18,6 +19,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | null>(null);
   const [authUser, loading] = useAuthState(auth);
 
@@ -40,6 +42,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (currentUser) {
           console.log("Current User Role:", currentUser.role); // Debug log
+          setCurrentUser(currentUser);
           setCurrentUserRole(currentUser.role);
         } else {
           console.error("No matching user found in Firestore.");
@@ -66,7 +69,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <DataContext.Provider value={{ users, orders, currentUserRole, loading }}>
+    <DataContext.Provider value={{ users, orders, currentUser, currentUserRole, loading }}>
       {children}
     </DataContext.Provider>
   );

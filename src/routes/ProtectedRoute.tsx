@@ -26,6 +26,7 @@ const ProtectedRoute: React.FC = () => {
 
         if (matchingUser && (matchingUser.role === "admin" || matchingUser.role === "operator")) {
           setAuthorized(true); // User is authorized
+          console.log(matchingUser.role, "role authorized.");
         } else {
           console.error("Unauthorized role or no matching user found.");
           setAuthorized(false); // Unauthorized or no match found

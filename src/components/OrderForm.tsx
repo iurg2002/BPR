@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { addOrder } from "../services/orderService";
 import { Order } from "../models/Order";
+import { OrderStatus } from "../models/OrderStatus";
 
 const OrderForm: React.FC = () => {
   const [order, setOrder] = useState<Omit<Order, "id" | "createdAt" | "updatedAt">>({
     customerName: "",
     phoneNumber: "",
-    status: "pending",
+    status: OrderStatus.Pending,
+    assignedOperator: "",
     amount: 0,
   });
 
@@ -19,7 +21,7 @@ const OrderForm: React.FC = () => {
     e.preventDefault();
     await addOrder(order);
     alert("Order created successfully!");
-    setOrder({ customerName: "", phoneNumber: "", status: "pending", amount: 0 });
+    setOrder({ customerName: "", phoneNumber: "", status: OrderStatus.Pending, amount: 0 ,assignedOperator: ""});
   };
 
   return (

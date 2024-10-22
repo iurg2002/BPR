@@ -3,4 +3,5 @@ export enum OrderStatus {
     Confirmed = 'confirmed',
     Cancelled = 'cancelled',
     CallLater = 'call_later',
+    InProgress = 'in_progress',
   }

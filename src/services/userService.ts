@@ -12,7 +12,7 @@ export const addUser = async (
   email: string,
   password: string,
   role: 'admin' | 'operator',
-  displayName?: string
+  displayName: string
 ): Promise<User> => {
   // Create the user in Firebase Authentication
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
