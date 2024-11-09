@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "../pages/Login";
 import OrdersTable from "../components/OrdersTable";
 import UserList from "../components/UserList";
-import OrderForm from "../components/OrderForm";
+// import OrderForm from "../components/OrderForm";
 import OperatorRoom from "../pages/OperatorRoom";
 import ProtectedRoute from "./ProtectedRoute";
 import NavBar from "../components/NavBar";
@@ -19,7 +19,7 @@ const AppRouter = () => (
       <Route element={<ProtectedRoute />}>
         <Route path="/orders" element={<OrdersTable />} />
         <Route path="/users" element={<UserList />} />
-        <Route path="/create-order" element={<OrderForm />} />
+        {/* <Route path="/create-order" element={<OrderForm />} /> */}
         <Route path="/operator" element={<OperatorRoom />} />
       </Route>
 

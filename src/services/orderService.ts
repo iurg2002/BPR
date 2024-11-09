@@ -24,7 +24,7 @@ export const addOrder = async (
 ): Promise<Order> => {
   const now = new Date();
   const docRef = await addDoc(ordersRef, { ...order, createdAt: now, updatedAt: now });
-  return { id: docRef.id, ...order, createdAt: now, updatedAt: now };
+  return { id: docRef.id, ...order, orderTime: now };
 };
 
 // Get all orders
@@ -107,8 +107,7 @@ export const updateOrderStatus = async (
     }
 
     const updates: Partial<Order> = {
-      status,
-      updatedAt: new Date(),
+      status
     };
 
     if (status !== 'in_progress') {

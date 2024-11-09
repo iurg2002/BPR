@@ -1,14 +1,42 @@
-import React, { useState } from 'react';
-import { Order } from '../models/Order';
-import { useData } from '../context/DataContext'; // Use DataContext
-import { updateOrder, releaseOrder, assignOrderToOperator } from '../services/orderService';
-import { OrderStatus } from '../models/OrderStatus';
+import React, { useEffect, useState, useMemo } from "react";
+import { Order } from "../models/Order";
+import { useData } from "../context/DataContext"; // Use DataContext
+import {
+  updateOrder,
+  releaseOrder,
+  assignOrderToOperator,
+} from "../services/orderService";
+import { OrderStatus } from "../models/OrderStatus";
+import {
+  Card,
+  Col,
+  Row,
+  Button,
+  Alert,
+  Container,
+} from "react-bootstrap";
+import { OrderPersonInfo } from "../components/OrderPersonInfo";
+import ProductSelector from "../components/ProductSelector";
+import OrderPriceCard from "../components/OrderPriceCard";
 
 const OperatorRoom: React.FC = () => {
-  const { orders, currentUser, currentUserRole, loading, users } = useData(); // Access the data context
+  const { orders, products, currentUser, loading, users } = useData(); // Access the data context
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<Order>>({});
+
+  // Calculate the total price of the order
+  const totalPrice = useMemo(() => {
+    if (!currentOrder) return 0;
+    const productTotal = currentOrder.products.reduce(
+      (sum, product) => sum + product.price + (product.upsell || 0),
+      0
+    );
+    const discountAmount = currentOrder.discount || 0;
+    return productTotal + currentOrder.deliveryPrice - discountAmount;
+  }, [currentOrder]);
+
+  useEffect(() => {
+    console.log("Order Updated:", currentOrder);
+  }, [currentOrder]);
 
   // Get the authenticated operator's user object
   const operator = users.find((user) => user.email === currentUser?.email);
@@ -17,54 +45,42 @@ const OperatorRoom: React.FC = () => {
     return <div>Error: No operator found.</div>;
   }
 
-// Fetch the next available order and assign it to the operator
-const fetchNextOrder = async () => {
-  try {
-    // 1. Check if the operator already has an active order (in_progress).
-    const activeOrders = orders.filter(
-      (order) => order.assignedOperator === operator.displayName && order.status === OrderStatus.InProgress
-    );
+  // Fetch the next available order and assign it to the operator
+  const fetchNextOrder = async () => {
+    try {
+      const activeOrders = orders.filter(
+        (order) =>
+          order.assignedOperator === operator.displayName &&
+          order.status === OrderStatus.InProgress
+      );
 
-    if (activeOrders.length > 0) {
-      alert('You already have an active order. Please complete or release it before taking a new one.');
-      setCurrentOrder(activeOrders[0]); // Show the active order
-      setFormData(activeOrders[0]); // Populate form with the active order data
-      return;
+      if (activeOrders.length > 0) {
+        alert("You already have an active order. Please complete or release it before taking a new one.");
+        setCurrentOrder(activeOrders[0]);
+        return;
+      }
+
+      const pendingOrders = orders.filter((order) => order.status === OrderStatus.Pending);
+      if (pendingOrders.length > 0) {
+        const nextOrder = pendingOrders[0];
+        await assignOrderToOperator(nextOrder.id, operator.displayName);
+        setCurrentOrder(nextOrder);
+      } else {
+        alert("No pending orders available.");
+      }
+    } catch (error) {
+      console.error("Error fetching next order:", error);
     }
-
-    // 2. If no active orders, fetch the next pending order
-    const pendingOrders = orders.filter((order) => order.status === OrderStatus.Pending);
-    if (pendingOrders.length > 0) {
-      const nextOrder = pendingOrders[0];
-
-      // Assign the order to the operator
-      await assignOrderToOperator(nextOrder.id, operator.displayName);
-      setCurrentOrder(nextOrder);
-      setFormData(nextOrder); // Initialize form with the order data
-    } else {
-      alert('No pending orders available.');
-    }
-  } catch (error) {
-    console.error('Error fetching next order:', error);
-  }
-};
-
-
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Save changes to the order
   const saveOrder = async () => {
     if (currentOrder) {
       try {
-        await updateOrder(currentOrder.id, formData);
-        alert('Order updated successfully.');
-        setIsEditing(false);
+        await updateOrder(currentOrder.id, { ...currentOrder, totalPrice });
+        alert("Order updated successfully.");
       } catch (error) {
-        console.error('Error updating order:', error);
+        console.error("Error updating order:", error);
       }
     }
   };
@@ -74,78 +90,49 @@ const fetchNextOrder = async () => {
     if (currentOrder) {
       try {
         await releaseOrder(currentOrder.id);
-        alert('Order released.');
+        alert("Order released.");
         setCurrentOrder(null);
       } catch (error) {
-        console.error('Error releasing order:', error);
+        console.error("Error releasing order:", error);
       }
     }
   };
 
   if (loading) return <div>Loading...</div>;
 
-  if (currentUserRole !== 'operator') {
-    return <div>Access denied. This page is only for operators.</div>;
-  }
-
   return (
-    <div>
-      <h1>Operator Room</h1>
-      {currentOrder ? (
-        <div>
-          <h2>Order ID: {currentOrder.id}</h2>
-          <div>
-            <label>Customer Name: </label>
-            <input
-              type="text"
-              name="customerName"
-              value={formData.customerName || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-            />
-          </div>
-          <div>
-            <label>Phone Number: </label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-            />
-          </div>
-          <div>
-            <label>Amount: </label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount || 0}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-            />
-          </div>
-          <div>
-            <label>Status: </label>
-            <input
-              type="text"
-              name="status"
-              value={formData.status || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-            />
-          </div>
-          <div>
-            <button onClick={() => setIsEditing(!isEditing)}>
-              {isEditing ? 'Cancel' : 'Edit'}
-            </button>
-            {isEditing && <button onClick={saveOrder}>Save</button>}
-            <button onClick={releaseCurrentOrder}>Release Order</button>
-          </div>
-        </div>
-      ) : (
-        <button onClick={fetchNextOrder}>Next Order</button>
-      )}
-    </div>
+    <>
+      <Container>
+        <Row>
+          <Col md={8}>
+            <Card>
+              <Card.Header>
+                <h2>Operator Room</h2>
+                <h3>{operator.displayName}!</h3>
+              </Card.Header>
+              {currentOrder ? (
+                <Card.Body>
+                  <OrderPersonInfo order={currentOrder} setOrder={setCurrentOrder} />
+                  <ProductSelector products={products} order={currentOrder} setOrder={setCurrentOrder} />
+                </Card.Body>
+              ) : (
+                <Card.Body>
+                  <Button onClick={fetchNextOrder}>Next Order</Button>
+                </Card.Body>
+              )}
+            </Card>
+          </Col>
+          <Col>
+            {currentOrder ? (
+              <OrderPriceCard order={{ ...currentOrder, totalPrice }} />
+            ) : (
+              <Alert variant="info">No order selected.</Alert>
+            )}
+          </Col>
+        </Row>
+        <Button onClick={saveOrder}>Save</Button>
+      </Container>
+    </>
   );
 };
 

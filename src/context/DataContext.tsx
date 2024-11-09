@@ -4,12 +4,14 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { User } from "../models/User";
 import { Order } from "../models/Order";
+import { Product } from "../models/Product";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 interface DataContextType {
   users: User[];
   currentUser: User | null;
   orders: Order[];
+  products: Product[];
   currentUserRole: "admin" | "operator" | null;
   loading: boolean;
 }
@@ -19,6 +21,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | null>(null);
   const [authUser, loading] = useAuthState(auth);
@@ -68,8 +71,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribeOrders();
   }, []);
 
+  useEffect(() => {
+    const productsRef = collection(db, "products");
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+      const fetchedProducts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Product[];
+      console.log("Fetched Products:", fetchedProducts); // Debug log
+      setProducts(fetchedProducts);
+    });
+
+    return () => unsubscribeProducts();
+  }, []);
+
   return (
-    <DataContext.Provider value={{ users, orders, currentUser, currentUserRole, loading }}>
+    <DataContext.Provider value={{ users, products, orders, currentUser, currentUserRole, loading }}>
       {children}
     </DataContext.Provider>
   );

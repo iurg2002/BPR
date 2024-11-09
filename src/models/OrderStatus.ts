@@ -5,3 +5,7 @@ export enum OrderStatus {
     CallLater = 'call_later',
     InProgress = 'in_progress',
   }
+export enum OrderType {
+  Success = 'success',
+  InputError = 'input_error'
+}
