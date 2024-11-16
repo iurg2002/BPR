@@ -134,7 +134,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
         </tbody>
       </Table>
       <div className="d-flex justify-content-end mb-2">
-        <Button variant="primary" onClick={() => setShowProductListModal(true)}>Add Order</Button>
+        <Button variant="primary" onClick={() => setShowProductListModal(true)}>Add Product</Button>
       </div>
 
       {/* Product Details Modal */}

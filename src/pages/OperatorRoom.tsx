@@ -5,6 +5,7 @@ import {
   updateOrder,
   releaseOrder,
   assignOrderToOperator,
+  cancelOrder,
 } from "../services/orderService";
 import { OrderStatus } from "../models/OrderStatus";
 import {
@@ -14,10 +15,12 @@ import {
   Button,
   Alert,
   Container,
+  Badge,
 } from "react-bootstrap";
 import { OrderPersonInfo } from "../components/OrderPersonInfo";
 import ProductSelector from "../components/ProductSelector";
 import OrderPriceCard from "../components/OrderPriceCard";
+import { OrderAddonsInfo } from "../components/OrderAddonsInfo";
 
 const OperatorRoom: React.FC = () => {
   const { orders, products, currentUser, loading, users } = useData(); // Access the data context
@@ -48,6 +51,12 @@ const OperatorRoom: React.FC = () => {
   // Fetch the next available order and assign it to the operator
   const fetchNextOrder = async () => {
     try {
+      if(currentOrder){
+        const newOrder = {...currentOrder, callCount: currentOrder.callCount + 1}
+        await updateOrder(currentOrder.id, newOrder);
+        await releaseOrder(currentOrder.id);
+        setCurrentOrder(null);
+      }
       const activeOrders = orders.filter(
         (order) =>
           order.assignedOperator === operator.displayName &&
@@ -55,12 +64,16 @@ const OperatorRoom: React.FC = () => {
       );
 
       if (activeOrders.length > 0) {
-        alert("You already have an active order. Please complete or release it before taking a new one.");
+        alert(
+          "You already have an active order. Please complete or release it before taking a new one."
+        );
         setCurrentOrder(activeOrders[0]);
         return;
       }
 
-      const pendingOrders = orders.filter((order) => order.status === OrderStatus.Pending);
+      const pendingOrders = orders.filter(
+        (order) => order.status === OrderStatus.Pending
+      );
       if (pendingOrders.length > 0) {
         const nextOrder = pendingOrders[0];
         await assignOrderToOperator(nextOrder.id, operator.displayName);
@@ -81,6 +94,7 @@ const OperatorRoom: React.FC = () => {
         alert("Order updated successfully.");
       } catch (error) {
         console.error("Error updating order:", error);
+        alert(error);
       }
     }
   };
@@ -90,34 +104,64 @@ const OperatorRoom: React.FC = () => {
     if (currentOrder) {
       try {
         await releaseOrder(currentOrder.id);
-        alert("Order released.");
         setCurrentOrder(null);
       } catch (error) {
         console.error("Error releasing order:", error);
+        alert(error);
       }
     }
   };
+
+  // Change status of the order to the selected status
+  const changeOrderStatus = async (status: OrderStatus) => {
+    if (currentOrder && operator) {
+      try {
+        await updateOrder(currentOrder.id, { ...currentOrder, status, assignedOperator: operator.displayName });
+        alert(`Order status changed to ${status}.`);
+        setCurrentOrder(null);
+      } catch (error) {
+        console.error("Error changing order status:", error);
+      }
+    }
+  };
+
+
+
 
   if (loading) return <div>Loading...</div>;
 
   return (
     <>
       <Container>
-        <Row>
+        <Row className="mt-3">
           <Col md={8}>
             <Card>
               <Card.Header>
                 <h2>Operator Room</h2>
-                <h3>{operator.displayName}!</h3>
+                <h3>
+                  {operator.displayName} -{" "}
+                  <Badge bg="primary">Order ID: {currentOrder?.orderId}</Badge>
+                </h3>
               </Card.Header>
               {currentOrder ? (
                 <Card.Body>
-                  <OrderPersonInfo order={currentOrder} setOrder={setCurrentOrder} />
-                  <ProductSelector products={products} order={currentOrder} setOrder={setCurrentOrder} />
+                  <OrderPersonInfo
+                    order={currentOrder}
+                    setOrder={setCurrentOrder}
+                  />
+                  <ProductSelector
+                    products={products}
+                    order={currentOrder}
+                    setOrder={setCurrentOrder}
+                  />
+                  <OrderAddonsInfo
+                    order={currentOrder}
+                    setOrder={setCurrentOrder}
+                  />
                 </Card.Body>
               ) : (
                 <Card.Body>
-                  <Button onClick={fetchNextOrder}>Next Order</Button>
+                  <Alert variant="info">No order selected.</Alert>
                 </Card.Body>
               )}
             </Card>
@@ -130,7 +174,38 @@ const OperatorRoom: React.FC = () => {
             )}
           </Col>
         </Row>
-        <Button onClick={saveOrder}>Save</Button>
+        <Row className="mt-3 justify-content-center">
+          <Col  xs="auto">
+            <Button className="btn-secondary" onClick={() =>
+              {
+                saveOrder();
+                releaseCurrentOrder();
+              }
+            }>Save & Close</Button>
+          </Col>
+          <Col xs="auto">
+            <Button className="btn-danger" onClick={()=> {
+              changeOrderStatus(OrderStatus.Cancelled);
+            }}>Cancel Order</Button>
+          </Col>
+
+          <Col xs="auto">
+          <Button className="btn-warning" onClick={()=>{
+            changeOrderStatus(OrderStatus.CallLater)
+            }}>Call Later</Button>
+          </Col>
+
+          <Col xs="auto">
+          <Button onClick={()=>{
+            fetchNextOrder()}}>Next Order</Button>
+          </Col>
+
+          <Col xs="auto">
+          <Button className="btn-success" onClick={()=>{
+            changeOrderStatus(OrderStatus.Confirmed)
+            }}>Confirm</Button>
+          </Col>
+        </Row>
       </Container>
     </>
   );

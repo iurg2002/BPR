@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Col, Form, ListGroup } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from "react";
+import { Form, ListGroup } from "react-bootstrap";
 
 interface SearchComponentProps {
   addresses: string[];
@@ -20,37 +20,31 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   const [filteredAddresses, setFilteredAddresses] = useState<string[]>([]);
   const [isValid, setIsValid] = useState<boolean>(true);
   const searchRef = useRef<HTMLDivElement | null>(null);
-  const prevCheckAgainst = useRef<string | undefined>(checkAgainst);
 
   useEffect(() => {
-    // Check if the entered value is in the list when checkAgainst changes and it's true
-    if (checkAgainst && checkAgainst !== prevCheckAgainst.current) {
-      if (addresses.length > 0) {
-        setIsValid(exactMatch ? addresses.includes(searchTerm) : true);
-      } else {
-        setIsValid(true); // If addresses list is empty, consider the value valid
-      }
-      prevCheckAgainst.current = checkAgainst;
+    // Update validity when `addresses` or `searchTerm` changes
+    if (addresses.length <= 1) {
+      setIsValid(true); // Always valid if list is empty or has one item
+    } else if (exactMatch) {
+      setIsValid(addresses.includes(searchTerm));
+    } else {
+      setIsValid(true); // Freeform input is valid when exactMatch is false
     }
-  }, [checkAgainst, addresses, exactMatch, searchTerm]);
+  }, [addresses, searchTerm, exactMatch]);
 
   useEffect(() => {
-    setSearchTerm(fieldValue || ""); // Update the search term when the fieldValue changes
+    setSearchTerm(fieldValue || ""); // Sync search term with external `fieldValue`
   }, [fieldValue]);
 
   useEffect(() => {
-    // Function to handle clicks outside the search component
+    // Close dropdown on outside click
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        // Clicked outside the search component, hide the list
         setFilteredAddresses([]);
       }
     };
 
-    // Add event listener for clicks on the document
     document.addEventListener("mousedown", handleClickOutside);
-
-    // Clean up the event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -60,29 +54,33 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
     const term = event.target.value;
     setSearchTerm(term);
 
-    if (addresses.length > 0) {
-      // Filter addresses based on search term
-      const filtered = addresses.filter((address) =>
-        address.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredAddresses(filtered);
+    // Filter addresses based on the term
+    const filtered = addresses.filter((address) =>
+      address.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredAddresses(filtered);
 
-      // Check if the entered value is in the list
-      setIsValid(exactMatch ? addresses.includes(term) : true);
-    } else {
+    // Directly update validity for one or fewer items
+    if (addresses.length <= 1) {
+      setIsValid(true);
       onSelectAddress(term);
+
+    } else if (exactMatch) {
+      setIsValid(addresses.includes(term));
+    } else {
+      setIsValid(true);
+    }
+
+    if (!exactMatch) {
+      onSelectAddress(term); // Freeform input passes value directly
     }
   };
 
   const handleAddressClick = (address: string) => {
-    if (exactMatch && !addresses.includes(address)) {
-      // If exactMatch is true and the selected address is not in the list, do nothing
-      return;
-    }
     onSelectAddress(address);
     setSearchTerm(address);
     setFilteredAddresses([]);
-    setIsValid(true); // Reset isValid to true after a selection is made
+    setIsValid(true); // Valid selection
   };
 
   return (
@@ -91,7 +89,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
         type="text"
         value={searchTerm}
         onChange={handleSearchChange}
-        className={isValid ? "" : "is-invalid"} // Add "is-invalid" class if the value is not in the list
+        className={isValid ? "" : "is-invalid"}
       />
       {filteredAddresses.length > 0 && (
         <ListGroup className="position-absolute" style={{ zIndex: 1, width: "100%" }}>

@@ -1,4 +1,5 @@
 import { Product } from "./Product";
+import { Timestamp } from "firebase/firestore";
 
 export interface Order {
     id: string;           // Firestore document ID
@@ -16,6 +17,7 @@ export interface Order {
     address: Address;
     customerAddress:string;
     deliveryPrice: number;
+    deliveryDate: Timestamp | null;
     totalPrice: number;
     
   }

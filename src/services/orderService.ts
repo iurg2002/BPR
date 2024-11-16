@@ -91,6 +91,22 @@ export const assignOrderToOperator = async (
   });
 };
 
+
+// Update order status to cancelled
+export const cancelOrder = async (orderId: string, operatorId: string): Promise<void> => {
+  await updateOrder(orderId, { status: OrderStatus.Cancelled, assignedOperator: operatorId });
+};
+
+// Update order status to call later
+export const callLater = async (orderId: string, operatorId: string): Promise<void> => {
+  await updateOrder(orderId, { status: OrderStatus.CallLater, assignedOperator: operatorId });
+}
+
+// Update order status to confirmed
+export const confirmOrder = async (orderId: string, operatorId: string): Promise<void> => {
+  await updateOrder(orderId, { status: OrderStatus.Confirmed, assignedOperator: operatorId });
+}
+
 // Update the order status (confirm, cancel, call later)
 export const updateOrderStatus = async (
   orderId: string,
@@ -128,3 +144,4 @@ export const releaseOrder = async (orderId: string): Promise<void> => {
     updatedAt: new Date(),
   });
 };
+
