@@ -11,7 +11,7 @@ const usersRef = collection(db, FirebaseCollections.Users);
 export const addUser = async (
   email: string,
   password: string,
-  role: 'admin' | 'operator',
+  role: 'admin' | 'operator' | null,
   displayName: string
 ): Promise<User> => {
   // Create the user in Firebase Authentication
