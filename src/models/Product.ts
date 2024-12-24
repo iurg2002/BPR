@@ -9,10 +9,16 @@ export interface Product {
     upsell: number;             // Upsell price for product
     stock: number;              // Available stock quantity
     category: string;           // Category to which the product belongs
+    instanceId?: string;
     // createdAt: Date;            // Timestamp for when the product was created
     // updatedAt: Date;            // Timestamp for the last product update
     // isActive: boolean;          // Determines if the product is active or discontinued
     // tags?: string[];            // Optional tags or keywords for the product
     // discount?: number;          // Optional discount percentage
+  }
+
+  export interface ProductInstance extends Product {
+    instanceId: string; // Unique identifier for each product instance in the order
+    personalization: string; // Personalization specific to this instance
   }
   

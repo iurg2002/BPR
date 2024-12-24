@@ -9,72 +9,62 @@ interface ProductSelectorProps {
   setOrder: React.Dispatch<React.SetStateAction<Order | null>>;
 }
 
-interface ProductInstance extends Product {
-  instanceId: string; // Unique identifier for each product instance in the order
-  personalization: string; // Personalization specific to this instance
-}
-
 const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setOrder }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showProductListModal, setShowProductListModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setShowProductModal(true);
-  };
-
+  // Handle adding a product to the order
   const handleProductAdd = (product: Product) => {
-    // Create a new product instance with unique instanceId and empty personalization
-    const productInstance: ProductInstance = { 
+    const productInstance = { 
       ...product, 
       instanceId: `${Date.now()}-${order.products.length}`, 
-      personalization: ""
+      personalization: product.personalization || ""
     };
 
-    // Add the new product instance to the order
     setOrder({
       ...order,
       products: [...order.products, productInstance],
     });
+
     setShowProductListModal(false);
   };
 
+  // Handle deleting a product instance from the order
   const handleProductDelete = (instanceId: string) => {
-    // Remove the product instance from the order's products array by instanceId
     setOrder({
       ...order,
-      products: order.products.filter(product => (product as ProductInstance).instanceId !== instanceId),
+      products: order.products.filter(product => product.instanceId !== instanceId),
     });
   };
 
+  // Handle updating the personalization field for a product
   const handlePersonalizationChange = (instanceId: string, personalization: string) => {
-    // Update the personalization for a specific product instance in the order
     setOrder({
       ...order,
       products: order.products.map(product =>
-        (product as ProductInstance).instanceId === instanceId ? { ...product, personalization } : product
+        product.instanceId === instanceId ? { ...product, personalization } : product
       ),
     });
   };
 
+  // Handle updating the upsell value for a product
   const handleUpsellChange = (instanceId: string, upsell: number) => {
-    // Update the upsell amount for a specific product instance in the order
     setOrder({
       ...order,
       products: order.products.map(product =>
-        (product as ProductInstance).instanceId === instanceId ? { ...product, upsell } : product
+        product.instanceId === instanceId ? { ...product, upsell } : product
       ),
     });
   };
 
+  // Handle updating the price value for a product
   const handlePriceChange = (instanceId: string, price: number) => {
-    // Update the upsell amount for a specific product instance in the order
     setOrder({
       ...order,
       products: order.products.map(product =>
-        (product as ProductInstance).instanceId === instanceId ? { ...product, price } : product
+        product.instanceId === instanceId ? { ...product, price } : product
       ),
     });
   };
@@ -98,34 +88,35 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
         </thead>
         <tbody>
           {order.products.map((product) => (
-            <tr key={(product as ProductInstance).instanceId}>
+            <tr key={product.instanceId}>
               <td>{product.productId}</td>
-              <td onClick={() => handleProductClick(product)} style={{ cursor: 'pointer' }}>{product.name}</td>
+              <td onClick={() => setSelectedProduct(product)} style={{ cursor: 'pointer' }}>{product.name}</td>
               <td>
                 <Form.Control
                   type="text"
                   placeholder="Enter personalization"
-                  value={(product as ProductInstance).personalization || ""}
-                  onChange={(e) => handlePersonalizationChange((product as ProductInstance).instanceId, e.target.value)}
+                  value={product.personalization || ""}
+                  onChange={(e) => handlePersonalizationChange(product.instanceId!, e.target.value)}
                 />
               </td>
               <td>
                 <Form.Control
-                  type="text"
+                  type="number"
                   placeholder="Enter upsell"
                   value={product.upsell || 0}
-                  onChange={(e) => handleUpsellChange((product as ProductInstance).instanceId, parseFloat(e.target.value))}
+                  onChange={(e) => handleUpsellChange(product.instanceId!, parseFloat(e.target.value))}
                 />
               </td>
               <td>
-              <Form.Control
-                  type="text"
+                <Form.Control
+                  type="number"
                   placeholder="Enter price"
                   value={product.price || 0}
-                  onChange={(e) => handlePriceChange((product as ProductInstance).instanceId, parseFloat(e.target.value))}/>
+                  onChange={(e) => handlePriceChange(product.instanceId!, parseFloat(e.target.value))}
+                />
               </td>
               <td>
-                <Button variant="danger" size="sm" onClick={() => handleProductDelete((product as ProductInstance).instanceId)}>
+                <Button variant="danger" size="sm" onClick={() => handleProductDelete(product.instanceId!)}>
                   Delete
                 </Button>
               </td>

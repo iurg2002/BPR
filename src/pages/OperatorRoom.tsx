@@ -28,6 +28,7 @@ import { Log, LogActions } from "../models/LogModel";
 import { addLog } from "../services/loggerService";
 import { formatFirestoreTimestampToDate } from '../utils/Utils';
 import { Timestamp } from 'firebase/firestore';
+import { ProductInstance } from "../models/Product";
 
 
 
@@ -105,7 +106,8 @@ const OperatorRoom: React.FC = () => {
       if (activeOrders.length > 0) {
         if(lastOrder && lastOrder.id === activeOrders[0].id && activeOrders.length === 1){} else {
         setError("You already have an active order. Please complete or release it before taking a new one.");
-        setCurrentOrder(activeOrders[0]);
+        const validatedOrder = validateAndSetOrder(activeOrders[0]);
+        setCurrentOrder(validatedOrder);
         return;
       }}
 
@@ -130,14 +132,23 @@ const OperatorRoom: React.FC = () => {
     if (!order) return order;
   
     if (order.products && order.products.length > 0) {
-      const updatedProducts = order.products.map((product) => {
+      const updatedProducts = order.products.map((product, index) => {
         const foundProduct = products.find((p) => p.productId === product.productId);
-        return foundProduct ? foundProduct : product;
+  
+        // Ensure each product has a unique instanceId
+        const instanceId = product.instanceId || `${Date.now()}-${index}`;
+  
+        return foundProduct
+          ? { ...foundProduct, instanceId } // Use the found product and add instanceId
+          : { ...product, instanceId }; // Keep original product and add instanceId
       });
+  
       return { ...order, products: updatedProducts };
     }
+  
     return order;
   };
+  
   
 
   // Save changes to the order
