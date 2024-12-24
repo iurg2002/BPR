@@ -8,6 +8,12 @@ import UserList from "../components/UserList";
 import OperatorRoom from "../pages/OperatorRoom";
 import ProtectedRoute from "./ProtectedRoute";
 import NavBar from "../components/NavBar";
+import Scanner from "../components/Scanner";
+import CreateOrder from "../pages/CreateOrder";
+import UsersPage from "../pages/UsersPage";
+import ProductsPage from "../pages/ProductsPage";
+import OrdersPage from "../pages/OrdersPage";
+import LogsPage from "../pages/LogsPage";
 
 const AppRouter = () => (
   <Router>
@@ -17,10 +23,14 @@ const AppRouter = () => (
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/orders" element={<OrdersTable />} />
-        <Route path="/users" element={<UserList />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/scanner" element={<Scanner />} />;
+        <Route path="/logs" element={<LogsPage />} />;
         {/* <Route path="/create-order" element={<OrderForm />} /> */}
         <Route path="/operator" element={<OperatorRoom />} />
+        <Route path="/create-order" element={<CreateOrder />} />
       </Route>
 
       {/* Redirect any unknown routes */}

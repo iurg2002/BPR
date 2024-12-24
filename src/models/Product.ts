@@ -7,8 +7,8 @@ export interface Product {
     imageUrl: string;               // URL to the product image
     personalization: string;      // Personalization options for the product
     upsell: number;             // Upsell price for product
-    // stock: number;              // Available stock quantity
-    // category: string;           // Category to which the product belongs
+    stock: number;              // Available stock quantity
+    category: string;           // Category to which the product belongs
     // createdAt: Date;            // Timestamp for when the product was created
     // updatedAt: Date;            // Timestamp for the last product update
     // isActive: boolean;          // Determines if the product is active or discontinued

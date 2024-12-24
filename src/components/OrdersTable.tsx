@@ -2,7 +2,7 @@
 import React from 'react';
 import { Table, Spinner } from 'react-bootstrap';
 import { useData } from '../context/DataContext';
-
+import { formatFirestoreTimestampToDate } from '../utils/Utils';
 const OrdersTable: React.FC = () => {
   const { orders, loading } = useData();
 
@@ -13,6 +13,8 @@ const OrdersTable: React.FC = () => {
       </Spinner>
     );
   }
+  // Function to format Firestore Timestamp
+
 
   return (
     <Table striped bordered hover>
@@ -41,7 +43,7 @@ const OrdersTable: React.FC = () => {
             <td>{order.assignedOperator || "N/A"}</td>
             <td>{order.callCount}</td>
             <td>{order.discount}</td>
-            <td>{order.orderTime.toLocaleString()}</td>
+            <td>{formatFirestoreTimestampToDate(order.orderTime)}</td>
             <td>{order.type}</td>
           </tr>
         ))}

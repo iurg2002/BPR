@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import { loginUser, registerUser } from "../services/authService"; // Replace with your services
 import { useNavigate } from "react-router-dom";
-import { addUser } from "../services/userService";
+import { addUser , addUserAuth} from "../services/userService";
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false); // Toggle between login and signup
@@ -28,7 +28,7 @@ const Login = () => {
       if (isSignUp) {
         // Register user
         // await registerUser({ email, password }); // Ensure name is included for registration
-        await addUser(email, password, null, name);
+        await addUserAuth(email, password);
       } else {
         // Log in user
         await loginUser({ email, password });

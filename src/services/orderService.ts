@@ -11,6 +11,7 @@ import {
   where,
   runTransaction,
   DocumentData,
+  setDoc,
 } from "firebase/firestore";
 import { Order } from "../models/Order";
 import { FirebaseCollections } from "../models/FirebaseCollections";
@@ -18,13 +19,10 @@ import { OrderStatus } from "../models/OrderStatus";
 
 const ordersRef = collection(db, FirebaseCollections.Orders);
 
-// Add a new order
-export const addOrder = async (
-  order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>
-): Promise<Order> => {
-  const now = new Date();
-  const docRef = await addDoc(ordersRef, { ...order, createdAt: now, updatedAt: now });
-  return { id: docRef.id, ...order, orderTime: now };
+// Add a new order with specific document ID
+export const addOrder = async (id: string, order: Order): Promise<void> => {
+  const docRef = doc(ordersRef, id);
+  await setDoc(docRef, order);
 };
 
 // Get all orders

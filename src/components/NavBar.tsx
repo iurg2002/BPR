@@ -16,7 +16,10 @@ const NavBar: React.FC = () => {
           <Nav className="me-auto">
             <Nav.Link onClick={() => navigate('/orders')}>Orders</Nav.Link>
             <Nav.Link onClick={() => navigate('/users')}>Users</Nav.Link>
+            <Nav.Link onClick={() => navigate('/logs')}>Logs</Nav.Link>
+            <Nav.Link onClick={() => navigate('/products')}>Products</Nav.Link>
             <Nav.Link onClick={() => navigate('/operator')}>Room</Nav.Link>
+            <Nav.Link onClick={() => navigate('/create-order')}>Create Order</Nav.Link>
           </Nav>
           <Button variant="outline-light" onClick={() => {logoutUser()
             navigate('/')
