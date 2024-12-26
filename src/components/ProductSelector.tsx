@@ -31,6 +31,11 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
     setShowProductListModal(false);
   };
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+
   // Handle deleting a product instance from the order
   const handleProductDelete = (instanceId: string) => {
     setOrder({
@@ -90,7 +95,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
           {order.products.map((product) => (
             <tr key={product.instanceId}>
               <td>{product.productId}</td>
-              <td onClick={() => setSelectedProduct(product)} style={{ cursor: 'pointer' }}>{product.name}</td>
+              <td onClick={() => handleProductClick(product)} style={{ cursor: 'pointer' }}>{product.name}</td>
               <td>
                 <Form.Control
                   type="text"

@@ -157,7 +157,7 @@ const OperatorRoom: React.FC = () => {
       try {
         await updateOrder(currentOrder.id, { ...currentOrder, totalPrice });
         await addLog({ action: LogActions.Save, user: operator.email });
-        // setError("Order updated successfully.");
+        setError(null);
       } catch (error) {
         console.error("Error updating order:", error);
         alert(error);
