@@ -4,5 +4,6 @@ export enum FirebaseCollections {
     Operators = 'operators',
     Products = 'products',
     Logs = 'logs',
+    Archive = 'archive',
   }
   

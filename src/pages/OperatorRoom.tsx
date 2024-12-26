@@ -6,6 +6,7 @@ import {
   releaseOrder,
   assignOrderToOperator,
   cancelOrder,
+  archiveOrder,
 } from "../services/orderService";
 import { OrderStatus, OrderType } from "../models/OrderStatus";
 import {
@@ -29,6 +30,7 @@ import { addLog } from "../services/loggerService";
 import { formatFirestoreTimestampToDate } from '../utils/Utils';
 import { Timestamp } from 'firebase/firestore';
 import { ProductInstance } from "../models/Product";
+import { arch } from "os";
 
 
 
@@ -225,6 +227,12 @@ const OperatorRoom: React.FC = () => {
     }
       try {
         await updateOrder(currentOrder.id, {
+          ...currentOrder,
+          status,
+          assignedOperator: operator.displayName,
+          totalPrice,
+        });
+        if(status === OrderStatus.Confirmed )await archiveOrder({
           ...currentOrder,
           status,
           assignedOperator: operator.displayName,

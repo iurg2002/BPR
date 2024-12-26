@@ -25,6 +25,14 @@ export const addOrder = async (id: string, order: Order): Promise<void> => {
   await setDoc(docRef, order);
 };
 
+
+// Add Order to archive
+export const archiveOrder = async (order: Order): Promise<void> => {
+  const archiveRef = collection(db, FirebaseCollections.Archive);
+  const docRef = doc(archiveRef, order.orderId.toString());
+  await setDoc(docRef, order);
+};
+
 // Get all orders
 export const getOrders = async (): Promise<Order[]> => {
   const snapshot = await getDocs(ordersRef);
