@@ -19,6 +19,7 @@ const ProductsPage: React.FC = () => {
       personalization: "",
       upsell: 0,
       stock: 0,
+      link: "",
       category: "",
     });
   
@@ -89,6 +90,7 @@ const ProductsPage: React.FC = () => {
             personalization: newProductData.personalization,
             upsell: newProductData.upsell,
             stock: newProductData.stock,
+            link: newProductData.link,
             category: newProductData.category,
           });
       
@@ -140,6 +142,7 @@ const ProductsPage: React.FC = () => {
         personalization: "",
         upsell: 0,
         stock: 0,
+        link: "",
         category: "",
       });
     };
@@ -247,6 +250,15 @@ const ProductsPage: React.FC = () => {
                 />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formProductCategory">
+                <Form.Label>Link</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="link"
+                    value={updatedProductData.link || ""}
+                    onChange={handleProductInputChange}
+                />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formProductCategory">
                 <Form.Label>Category</Form.Label>
                 <Form.Control
                     type="text"
@@ -330,6 +342,15 @@ const ProductsPage: React.FC = () => {
           onChange={handleNewProductInputChange}
         />
       </Form.Group>
+      <Form.Group className="mb-3" controlId="formProductCategory">
+                <Form.Label>Link</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="script"
+                    value={updatedProductData.link || ""}
+                    onChange={handleProductInputChange}
+                />
+        </Form.Group>
       <Form.Group className="mb-3" controlId="formNewProductCategory">
         <Form.Label>Category</Form.Label>
         <Form.Control

@@ -84,7 +84,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
+            {/* <th>Name</th> */}
             <th>Personalization</th>
             <th>Upsell</th>
             <th>Price</th>
@@ -94,8 +94,8 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
         <tbody>
           {order.products.map((product) => (
             <tr key={product.instanceId}>
-              <td>{product.productId}</td>
-              <td onClick={() => handleProductClick(product)} style={{ cursor: 'pointer' }}>{product.name}</td>
+              <td onClick={() => handleProductClick(product)} style={{ cursor: 'pointer' }}>{product.productId}</td>
+              {/* <td onClick={() => handleProductClick(product)} style={{ cursor: 'pointer' }}>{product.name}</td> */}
               <td>
                 <Form.Control
                   type="text"
@@ -141,11 +141,20 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ products, order, setO
         <Modal.Body>
           <Image src={selectedProduct?.imageUrl} alt={selectedProduct?.name} fluid />
           <p className="mt-3">{selectedProduct?.description}</p>
+    {selectedProduct?.link && <Button
+      variant="dark"
+      onClick={() => window.open(`${selectedProduct?.link}`, '_blank')}
+    >
+      View Product Page
+    </Button>}
+          
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowProductModal(false)}>Close</Button>
         </Modal.Footer>
       </Modal>
+
+
 
       {/* Add Product Modal */}
       <Modal show={showProductListModal} onHide={() => setShowProductListModal(false)}>

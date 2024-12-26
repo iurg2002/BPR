@@ -12,7 +12,7 @@ interface DataContextType {
   currentUser: User | null;
   orders: Order[];
   products: Product[];
-  currentUserRole: "admin" | "operator" | null;
+  currentUserRole: "admin" | "operator" | "packer"| null;
   loading: boolean;
 }
 
@@ -23,7 +23,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | "packer" | null>(null);
   const [authUser, loading] = useAuthState(auth);
 
   useEffect(() => {

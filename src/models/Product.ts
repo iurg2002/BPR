@@ -10,6 +10,7 @@ export interface Product {
     stock: number;              // Available stock quantity
     category: string;           // Category to which the product belongs
     instanceId?: string;
+    link?: string;
     // createdAt: Date;            // Timestamp for when the product was created
     // updatedAt: Date;            // Timestamp for the last product update
     // isActive: boolean;          // Determines if the product is active or discontinued

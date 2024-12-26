@@ -206,13 +206,15 @@ const OperatorRoom: React.FC = () => {
     setError(null);
     if (currentOrder && operator) {
       // Ensure a comment is present for cancellation
-    if (status === OrderStatus.Cancelled || status === OrderStatus.CallLater && (!currentOrder.comment || !currentOrder.comment.trim())) {
+    if (status === OrderStatus.Cancelled || status === OrderStatus.CallLater)
+      if((!currentOrder.comment || !currentOrder.comment.trim())) {
       setError("A comment is required.");
       return;
     }
 
     // Ensure a comment is present for cancellation
-    if (status === OrderStatus.Confirmed && (!currentOrder.address.state || !currentOrder.address.state.trim())
+    if (status === OrderStatus.Confirmed){
+      if((!currentOrder.address.state || !currentOrder.address.state.trim())
     || (!currentOrder.address.locality || !currentOrder.address.locality.trim())
     || (!currentOrder.address.street || !currentOrder.address.street.trim())
     || (!currentOrder.address.streetNr || !currentOrder.address.streetNr.trim())
@@ -220,6 +222,7 @@ const OperatorRoom: React.FC = () => {
       setError("Please fill in the address to confirm the order.");
       return;
     }
+  }
 
     if (status === OrderStatus.Confirmed && currentOrder.products.length === 0) {
       setError("Please add products to confirm the order.");

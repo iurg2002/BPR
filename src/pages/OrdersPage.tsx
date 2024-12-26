@@ -8,7 +8,7 @@ import { Order } from '../models/Order';
 import { Timestamp } from 'firebase/firestore';
 
 const OrdersPage: React.FC = () => {
-  const { orders, loading } = useData();
+  const { orders, loading, currentUserRole } = useData();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [callCountFilter, setCallCountFilter] = useState<number | ''>('');
 
@@ -88,39 +88,37 @@ const OrdersPage: React.FC = () => {
           <thead>
             <tr>
               <th>#</th>
-              <th>ID</th>
               <th>Order ID</th>
               <th>Customer Name</th>
               <th>Phone</th>
               <th>Status</th>
               <th>Assigned Operator</th>
               <th>Call Count</th>
-              <th>Discount</th>
+              <th>Comment</th>
               <th>Order Time</th>
               <th>Type</th>
-              <th>Actions</th>
+              {(currentUserRole == "admin") && (<th>Actions</th>)}
             </tr>
           </thead>
           <tbody>
             {filteredOrders.map((order, index) => (
               <tr key={order.id}>
                 <td>{index + 1}</td>
-                <td>{order.id}</td>
                 <td>{order.orderId}</td>
                 <td>{order.name}</td>
                 <td>{order.phone}</td>
                 <td>{order.status == OrderStatus.Pending && <Badge bg='warning'>{order.status}</Badge>}
                 {order.status == OrderStatus.Confirmed && <Badge bg='success'>{order.status}</Badge>}
-                {order.status == OrderStatus.CallLater && <Badge bg='light'>{order.status}</Badge>}
+                {order.status == OrderStatus.CallLater && <Badge bg='dark'>{order.status}</Badge>}
                 {order.status == OrderStatus.Cancelled && <Badge bg='danger'>{order.status}</Badge>}
                 {order.status == OrderStatus.InProgress && <Badge bg='primary'>{order.status}</Badge>}</td>
                 <td>{order.assignedOperator || 'N/A'}</td>
                 <td>{order.callCount}</td>
-                <td>{order.discount}</td>
+                <td>{order.comment}</td>
                 <td>{formatFirestoreTimestampToDate(order.orderTime)}</td>
                 <td>{order.type}</td>
-                <td>{order.status == OrderStatus.InProgress || order.status == OrderStatus.CallLater  && <Button onClick={setStatusPending(order)}>Clear Status</Button>}
-               </td>
+                {(currentUserRole == "admin") && (<td>{(order.status == OrderStatus.InProgress || order.status == OrderStatus.CallLater)  && (<Button onClick={setStatusPending(order)}>Clear Status</Button>)}
+               </td>)}
               </tr>
             ))}
           </tbody>

@@ -49,7 +49,7 @@ const CreateOrder: React.FC = () => {
     }
 
     function getOrderId(): number {
-        let orderId = orders.length * 1000;
+        let orderId = orders[orders.length-1].orderId + 999000000;
         // cehck if the order id is already taken
         while(orders.find(order => order.orderId === orderId)){
             orderId = orderId * 10;

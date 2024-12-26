@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert, Table } from "react-bootstrap";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { getOrderFromArchiveByAWB } from "../services/orderService";
 
 const Scanner = () => {
   const [scannedValue, setScannedValue] = useState<string | null>(null);
+  const [order, setOrder] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scannerInstance, setScannerInstance] = useState<Html5QrcodeScanner | null>(null);
 
@@ -16,10 +18,11 @@ const Scanner = () => {
 
     const scanner = new Html5QrcodeScanner("scanner-container", config, false);
     scanner.render(
-      (decodedText) => {
+      async (decodedText) => {
         setScannedValue(decodedText);
         setError(null);
         scanner.clear(); // Stop the scanner after a successful scan
+        await checkOrderInArchive(decodedText); // Check the order in Firestore
       },
       (err) => {
         setError("Error scanning QR code or barcode. Please try again.");
@@ -28,6 +31,24 @@ const Scanner = () => {
     );
 
     setScannerInstance(scanner);
+  };
+
+  // Function to check the Firestore archive collection
+  const checkOrderInArchive = async (awb: string) => {
+    try {
+      const orderData = await getOrderFromArchiveByAWB(awb);
+
+      if (orderData) {
+        setOrder(orderData);
+        console.log("Order found in archive2:", orderData);
+      } else {
+        setError("No order found with the provided AWB.");
+        setOrder(null);
+      }
+    } catch (err) {
+      console.error("Error checking order in Firestore:", err);
+      setError("An error occurred while checking the order. Please try again.");
+    }
   };
 
   // Initialize the scanner on component mount
@@ -45,6 +66,7 @@ const Scanner = () => {
   // Reset scanner and state
   const handleReset = () => {
     setScannedValue(null);
+    setOrder(null);
     setError(null);
 
     if (scannerInstance) {
@@ -62,6 +84,32 @@ const Scanner = () => {
           {scannedValue && (
             <Alert variant="success" className="mt-3">
               Scanned Value: {scannedValue}
+            </Alert>
+          )}
+          {order && (
+            <Alert variant="light" className="mt-3">
+              <h5>Order Details:</h5>
+              <p><strong>ID:</strong> {order.id}</p>
+              <p><strong>Name:</strong> {order.name}</p>
+              <p><strong>Phone:</strong> {order.phone}</p>
+              <p><strong>Status:</strong> {order.status}</p>
+              <p><strong>Comment:</strong> {order.comment}</p>
+              <Table striped bordered hover className="mt-3">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Personalization</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.products.map((product: any, index: number) => (
+                    <tr key={index}>
+                      <td>{product.productId}</td>
+                      <td>{product.personalization}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </Alert>
           )}
           <div id="scanner-container" className="mt-4" style={{ width: "100%" }} />

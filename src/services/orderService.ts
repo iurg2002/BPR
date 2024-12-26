@@ -33,6 +33,21 @@ export const archiveOrder = async (order: Order): Promise<void> => {
   await setDoc(docRef, order);
 };
 
+export const getOrderFromArchiveByAWB = async (awb: string): Promise<Order | null> => {
+  const archiveRef = collection(db, FirebaseCollections.Archive);
+  const q = query(archiveRef, where("AWB", "==", awb));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    console.log("Order found in archive.");
+    const orderData = querySnapshot.docs[0].data();
+    console.log("Order data: ", orderData);
+    return orderData as Order;
+  }
+
+  return null;
+}
+
 // Get all orders
 export const getOrders = async (): Promise<Order[]> => {
   const snapshot = await getDocs(ordersRef);
@@ -85,7 +100,7 @@ export const assignOrderToOperator = async (
     }
 
     const order = orderDoc.data() as Order;
-    if (order.status !== 'pending') {
+    if (order.status !== OrderStatus.Pending && order.status !== OrderStatus.CallLater) {
       throw new Error('Order is not available for assignment.');
     }
 
