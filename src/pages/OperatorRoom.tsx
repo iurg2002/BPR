@@ -35,7 +35,7 @@ import { arch } from "os";
 
 
 const OperatorRoom: React.FC = () => {
-  const { orders, products, currentUser, loading, users } = useData(); // Access the data context
+  const { orders, products, currentUser, loading, users, country } = useData(); // Access the data context
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [callCountFilter, setCallCountFilter] = useState<number | "">("");
@@ -92,8 +92,8 @@ const OperatorRoom: React.FC = () => {
           ...currentOrder,
           callCount: currentOrder.callCount + 1,
         };
-        await updateOrder(currentOrder.id, newOrder);
-        await releaseOrder(currentOrder.id);
+        await updateOrder(currentOrder.id, newOrder, country);
+        await releaseOrder(currentOrder.id, country);
         setCurrentOrder(null);
         // createa a one second pause
         // await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -117,7 +117,7 @@ const OperatorRoom: React.FC = () => {
         // (order) => order.status === OrderStatus.Pending && order.type === typeFilter &&  order.callCount === callCountFilter);
       if (filteredOrders.length > 0) {
         const nextOrder = filteredOrders[0];
-        await assignOrderToOperator(nextOrder.id, operator.displayName);
+        await assignOrderToOperator(nextOrder.id, operator.displayName, country);
         const validatedOrder = validateAndSetOrder(nextOrder);
         setCurrentOrder(validatedOrder);
           
@@ -157,7 +157,7 @@ const OperatorRoom: React.FC = () => {
   const saveOrder = async () => {
     if (currentOrder) {
       try {
-        await updateOrder(currentOrder.id, { ...currentOrder, totalPrice });
+        await updateOrder(currentOrder.id, { ...currentOrder, totalPrice }, country);
         await addLog({ action: LogActions.Save, user: operator.email });
         setError(null);
       } catch (error) {
@@ -174,12 +174,12 @@ const OperatorRoom: React.FC = () => {
           ...currentOrder,
           callCount: currentOrder.callCount + 1,
         };
-        await updateOrder(currentOrder.id, newOrder);
-        await releaseOrder(currentOrder.id);
+        await updateOrder(currentOrder.id, newOrder, country);
+        await releaseOrder(currentOrder.id, country);
         setCurrentOrder(null);
       }
       if (order) {
-        await assignOrderToOperator(order.id, operator.displayName);
+        await assignOrderToOperator(order.id, operator.displayName, country);
         const validatedOrder = validateAndSetOrder(order);
         setCurrentOrder(validatedOrder);
       }
@@ -192,7 +192,7 @@ const OperatorRoom: React.FC = () => {
   const releaseCurrentOrder = async () => {
     if (currentOrder) {
       try {
-        await releaseOrder(currentOrder.id);
+        await releaseOrder(currentOrder.id, country);
         setCurrentOrder(null);
       } catch (error) {
         console.error("Error releasing order:", error);
@@ -234,13 +234,14 @@ const OperatorRoom: React.FC = () => {
           status,
           assignedOperator: operator.displayName,
           totalPrice,
-        });
+        },
+        country);
         if(status === OrderStatus.Confirmed )await archiveOrder({
           ...currentOrder,
           status,
           assignedOperator: operator.displayName,
           totalPrice,
-        });
+        }, country);
         await addLog({ action: status, user: operator.email });
         setCurrentOrder(null);
       } catch (error) {

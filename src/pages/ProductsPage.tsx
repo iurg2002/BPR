@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Table, Alert, Spinner, Container, Button, Modal, Form } from "react-bootstrap";
 import { Product } from "../models/Product";
 import { addProduct, updateProduct, deleteProduct, getProducts } from "../services/productService";
+import { useData } from "../context/DataContext";
+import { Country } from "../models/Countries";
 
 const ProductsPage: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { country, products } = useData();
+    // const [products, setProducts] = useState<Product[]>([]);
+    // const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -23,29 +26,6 @@ const ProductsPage: React.FC = () => {
       category: "",
     });
   
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const fetchedProducts = await getProducts();
-          setProducts(fetchedProducts);
-        } catch (error) {
-          console.error("Error fetching products:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchProducts();
-    }, []);
-  
-    if (loading) {
-      return (
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      );
-    }
-  
     const handleEditProduct = (product: Product) => {
       setSelectedProduct(product);
       setUpdatedProductData(product);
@@ -55,12 +35,7 @@ const ProductsPage: React.FC = () => {
     const handleSaveProductChanges = async () => {
       if (selectedProduct) {
         try {
-          await updateProduct(selectedProduct.id, updatedProductData);
-          setProducts((prev) =>
-            prev.map((prod) =>
-              prod.id === selectedProduct.id ? { ...prod, ...updatedProductData } : prod
-            )
-          );
+          await updateProduct(selectedProduct.id, updatedProductData, country);
           setShowEditModal(false);
         } catch (error) {
           console.error("Error updating product:", error);
@@ -92,10 +67,9 @@ const ProductsPage: React.FC = () => {
             stock: newProductData.stock,
             link: newProductData.link,
             category: newProductData.category,
-          });
+          }, country);
       
           // Update state with the newly added product
-          setProducts((prev) => [...prev, newProduct]);
       
           // Reset the form data after adding
           resetNewProductData();
@@ -119,8 +93,7 @@ const ProductsPage: React.FC = () => {
     const handleDeleteProduct = async (productId: string) => {
       if (window.confirm("Are you sure you want to delete this product?")) {
         try {
-          await deleteProduct(productId);
-          setProducts((prev) => prev.filter((product) => product.id !== productId));
+          await deleteProduct(productId, country);
         } catch (error) {
           console.error("Error deleting product:", error);
         }
@@ -166,7 +139,7 @@ const ProductsPage: React.FC = () => {
               <td>{product.productId}</td>
               <td>{product.name}</td>
               <td>{product.description}</td>
-              <td>RON {product.price}</td>
+              <td>{country == Country.MD && "MDL"} {country == Country.RO && "RON"} {product.price}</td>
               <td>{product.stock}</td>
               <td>
                 <Button
@@ -346,11 +319,11 @@ const ProductsPage: React.FC = () => {
                 <Form.Label>Link</Form.Label>
                 <Form.Control
                     type="text"
-                    name="script"
+                    name="link"
                     value={updatedProductData.link || ""}
                     onChange={handleProductInputChange}
                 />
-        </Form.Group>
+            </Form.Group>
       <Form.Group className="mb-3" controlId="formNewProductCategory">
         <Form.Label>Category</Form.Label>
         <Form.Control

@@ -2,7 +2,6 @@ import React from "react";
 import { Table, Spinner, Col, Row, Form, InputGroup } from "react-bootstrap";
 import { Order } from "../models/Order";
 import { useState } from "react";
-import { addresses } from "../context/AddressesGLS";
 import SearchComponent from "./SearchComponent";
 import AddressSelector from "./AddressSelector";
 

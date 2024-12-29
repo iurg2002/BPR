@@ -6,6 +6,7 @@ import { User } from "../models/User";
 import { Order } from "../models/Order";
 import { Product } from "../models/Product";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { Country } from "../models/Countries";
 
 interface DataContextType {
   users: User[];
@@ -13,6 +14,8 @@ interface DataContextType {
   orders: Order[];
   products: Product[];
   currentUserRole: "admin" | "operator" | "packer"| null;
+  country: Country;
+  updateCountry: (newCountry: Country) => void;
   loading: boolean;
 }
 
@@ -22,6 +25,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [country, setCountry] = useState(Country.RO);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | "packer" | null>(null);
   const [authUser, loading] = useAuthState(auth);
@@ -58,7 +62,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [authUser, loading]);
 
   useEffect(() => {
-    const ordersRef = collection(db, "orders");
+    const collectionName = country === Country.RO ? "orders" : "ordersMD";
+    const ordersRef = collection(db, collectionName);
     const unsubscribeOrders = onSnapshot(ordersRef, (snapshot) => {
       const fetchedOrders = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -69,10 +74,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => unsubscribeOrders();
-  }, []);
+  }, [country]);
 
   useEffect(() => {
-    const productsRef = collection(db, "products");
+    const collectionName = country === Country.RO ? "products" : "productsMD";
+    const productsRef = collection(db, collectionName);
     const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
       const fetchedProducts = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -83,10 +89,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => unsubscribeProducts();
-  }, []);
+  }, [country]);
+
+
+  useEffect(() => {
+    console.log("Current Country:", country); // Debug log
+  }, [country]);
+
+  const updateCountry = (newCountry: Country) => {
+    setCountry(newCountry);
+};
+
 
   return (
-    <DataContext.Provider value={{ users, products, orders, currentUser, currentUserRole, loading }}>
+    <DataContext.Provider value={{ users, products, orders, country, updateCountry, currentUser, currentUserRole, loading}}>
       {children}
     </DataContext.Provider>
   );

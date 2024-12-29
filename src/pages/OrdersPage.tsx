@@ -8,7 +8,7 @@ import { Order } from '../models/Order';
 import { Timestamp } from 'firebase/firestore';
 
 const OrdersPage: React.FC = () => {
-  const { orders, loading, currentUserRole } = useData();
+  const { orders, loading, currentUserRole, country } = useData();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [callCountFilter, setCallCountFilter] = useState<number | ''>('');
 
@@ -39,7 +39,7 @@ const OrdersPage: React.FC = () => {
 
   const setStatusPending = (order: Order) => async () => {
     // Update the order with a null assigned operator
-    await updateOrder(order.id, { ...order, assignedOperator: null, status: OrderStatus.Pending });
+    await updateOrder(order.id, { ...order, assignedOperator: null, status: OrderStatus.Pending }, country);
   };
 
   return (

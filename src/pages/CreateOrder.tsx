@@ -25,7 +25,7 @@ import { OrderAddonsInfo } from "../components/OrderAddonsInfo";
 import { Form } from "react-bootstrap";
 
 const CreateOrder: React.FC = () => {
-    const { orders, products, currentUser, loading, users } = useData();
+    const { orders, products, currentUser, loading, users, country } = useData();
     const [newOrder, setNewOrder] = useState<Order | null>(null);
     const [error, setError] = useState<string | null>(null);
     useEffect(() => {
@@ -95,7 +95,7 @@ const CreateOrder: React.FC = () => {
         console.log("Saving order:", newOrder);
         // Proceed with saving logic (e.g., Firestore integration)
         if(newOrder == null) throw new Error("No order selected.");
-        await addOrder(newOrder.id, newOrder);
+        await addOrder(newOrder.id, newOrder, country);
         setNewOrder(null);
       } catch (error) {
         console.error("Error saving order:", error);

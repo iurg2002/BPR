@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Col, Form } from "react-bootstrap";
 import { Order } from "../models/Order";
-import { addresses } from "../context/AddressesGLS";
+import { addresses, addressesMD } from "../context/AddressesGLS";
 import SearchComponent from "./SearchComponent";
+import { useData } from "../context/DataContext";
+import { useEffect } from "react";
+import { Country } from "../models/Countries";
 
 interface AddressSelectorProps {
   order: Order;
@@ -17,6 +20,16 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
   const [street, setStreet] = useState<string>(order.address?.street || "");
   const [localities, setLocalities] = useState<string[]>([]);
   const [streets, setStreets] = useState<string[]>([]);
+  const {country} = useData();
+  const [currentAddresses, setCurrentAddresses] = useState(addresses);
+
+  useEffect(() => {
+    if (country == Country.MD) {
+      setCurrentAddresses(addressesMD);
+    } else {
+      setCurrentAddresses(addresses);
+    }
+  }, [country]);
 
   function getUniqueValues(inputArray: string[]): string[] {
     return Array.from(new Set(inputArray));
@@ -27,7 +40,7 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
     setLocality("");
     setLocalities(
       getUniqueValues(
-        addresses
+        currentAddresses
           .filter((address) => address.Judet === currentState)
           .map((address) => address.Localitate)
       )
@@ -50,7 +63,7 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
   function onSelectLocality(currentLocality: string): void {
     setLocality(currentLocality);
     const filteredStreets = getUniqueValues(
-      addresses
+      currentAddresses
         .filter(
           (address) =>
             address.Judet === state && address.Localitate === currentLocality
@@ -62,7 +75,7 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
     setStreet("");
     const zipcode =
       filteredStreets.length === 1
-        ? addresses.find(
+        ? currentAddresses.find(
             (address) =>
               address.Judet === state && address.Localitate === currentLocality
           )?.Codpostal || ""
@@ -83,7 +96,7 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
     setStreet(currentStreet);
     if (streets.length > 1) {
       const zipcode =
-        addresses.find(
+      currentAddresses.find(
           (address) =>
             address.Judet === state &&
             address.Localitate === locality &&
@@ -108,7 +121,7 @@ function AddressSelector({ order, setOrder }: AddressSelectorProps) {
       <Col md={2}>
         <Form.Label>State</Form.Label>
         <SearchComponent
-          addresses={getUniqueValues(addresses.map((a) => a.Judet))}
+          addresses={getUniqueValues(currentAddresses.map((a) => a.Judet))}
           onSelectAddress={onSelectState}
           exactMatch={true}
           fieldValue={state}

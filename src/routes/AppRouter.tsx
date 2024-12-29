@@ -14,6 +14,7 @@ import UsersPage from "../pages/UsersPage";
 import ProductsPage from "../pages/ProductsPage";
 import OrdersPage from "../pages/OrdersPage";
 import LogsPage from "../pages/LogsPage";
+import SearchArchive from "../pages/SearchArchive";
 
 const AppRouter = () => (
   <Router>
@@ -31,6 +32,7 @@ const AppRouter = () => (
         {/* <Route path="/create-order" element={<OrderForm />} /> */}
         <Route path="/operator" element={<OperatorRoom />} />
         <Route path="/create-order" element={<CreateOrder />} />
+        <Route path="/search-archive" element={<SearchArchive />} />
       </Route>
 
       {/* Redirect any unknown routes */}

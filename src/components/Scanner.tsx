@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Alert, Table } from "react-bootstrap";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { getOrderFromArchiveByAWB } from "../services/orderService";
+import { useData } from "../context/DataContext";
 
 const Scanner = () => {
   const [scannedValue, setScannedValue] = useState<string | null>(null);
   const [order, setOrder] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scannerInstance, setScannerInstance] = useState<Html5QrcodeScanner | null>(null);
+  const {country } = useData(); // Access the data context
+  
 
   // Function to initialize the scanner
   const initializeScanner = () => {
@@ -36,7 +39,7 @@ const Scanner = () => {
   // Function to check the Firestore archive collection
   const checkOrderInArchive = async (awb: string) => {
     try {
-      const orderData = await getOrderFromArchiveByAWB(awb);
+      const orderData = await getOrderFromArchiveByAWB(awb, country);
 
       if (orderData) {
         setOrder(orderData);

@@ -30,3 +30,25 @@ export interface Order {
     streetNr: string;
     zipcode: string;
   }
+
+
+ export interface SentOrder{
+    id: string;           // Firestore document ID
+    orderId: number;
+    name: string;
+    phone: string;
+    status: 'pending' | 'confirmed' | 'cancelled' | 'call_later' | 'in_progress';
+    assignedOperator: string | null;
+    callCount: number;
+    comment: string;
+    discount: number;
+    orderTime: Date;
+    products: Product[];
+    type: string;
+    address: Address;
+    customerAddress:string;
+    deliveryPrice: number;
+    deliveryDate: Timestamp | null;
+    totalPrice: number;
+    AWB: string;
+  }
