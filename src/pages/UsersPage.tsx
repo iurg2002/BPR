@@ -207,6 +207,7 @@ const UsersPage: React.FC = () => {
                 <option value="">Select Role</option>
                 <option value="admin">Admin</option>
                 <option value="operator">Operator</option>
+                <option value="packer">Packer</option>
               </Form.Select>
             </Form.Group>
           </Form>
