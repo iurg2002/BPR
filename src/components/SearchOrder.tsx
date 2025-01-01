@@ -25,7 +25,7 @@ const SearchOrders: React.FC<{ setCurrentOrder: (order: Order | null) => void, c
     setSearchTerm(term);
     const results = orders.filter((order) =>
       order.name.toLowerCase().includes(term.toLowerCase()) ||
-      order.phone.includes(term) ||
+      order.phone.toString().includes(term) ||
       order.orderId.toString().includes(term)
     );
     setFilteredOrders(results);
