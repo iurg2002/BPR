@@ -83,9 +83,10 @@ export function OrderAddonsInfo({ order, setOrder }: OrderAddonsInfoProps) {
                 : ""
             }
             onChange={(e) => {
+                const newValue = e.target.value;
                 const newOrder = {
                     ...order,
-                    deliveryDate: Timestamp.fromDate(new Date(e.target.value))
+                    deliveryDate: newValue ? Timestamp.fromDate(new Date(newValue)) : null,
                   };
                   setOrder(newOrder);
             }}
