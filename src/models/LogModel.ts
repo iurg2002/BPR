@@ -11,5 +11,6 @@ export enum LogActions {
     CallLater = 'call_later',
     Next = 'next', 
     Save = 'save', 
-    Search = 'search'
+    Search = 'search',
+    Pause = 'pause',
   }

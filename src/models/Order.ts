@@ -51,4 +51,6 @@ export interface Order {
     deliveryDate: Timestamp | null;
     totalPrice: number;
     AWB: string;
+    updatedAt: Date;
+    awbStatus: 'delivered' | 'returned' | 'in_progress' | null;
   }

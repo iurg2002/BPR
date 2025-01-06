@@ -15,6 +15,7 @@ import ProductsPage from "../pages/ProductsPage";
 import OrdersPage from "../pages/OrdersPage";
 import LogsPage from "../pages/LogsPage";
 import SearchArchive from "../pages/SearchArchive";
+import OperatorManager from "../pages/OperatorManager";
 
 const AppRouter = () => (
   <Router>
@@ -29,6 +30,7 @@ const AppRouter = () => (
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/scanner" element={<Scanner />} />;
         <Route path="/logs" element={<LogsPage />} />;
+        <Route path="/operator-manager" element={<OperatorManager />} />;
         {/* <Route path="/create-order" element={<OrderForm />} /> */}
         <Route path="/operator" element={<OperatorRoom />} />
         <Route path="/create-order" element={<CreateOrder />} />

@@ -40,6 +40,7 @@ const OperatorRoom: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [callCountFilter, setCallCountFilter] = useState<number | "">("");
   const [error, setError] = useState<string | null>(null);
+  const [pause, setPause] = useState(false);
 
   const filteredOrders = orders.filter((order) => {
       const matchesType = typeFilter ? order.type === typeFilter : true;
@@ -129,6 +130,19 @@ const OperatorRoom: React.FC = () => {
       console.error("Error fetching next order:", error);
     }
   };
+
+  const handlePause = async () => {
+    try{
+      if(currentOrder){
+        setError("Please release the current order before pausing.");
+        return;
+      }
+      await addLog({ action: LogActions.Pause, user: operator.email });
+      setPause(!pause);
+    } catch (error) {
+      console.error("Error pausing operator:", error);
+    }
+  }
 
   const validateAndSetOrder = (order: Order | null) => {
     if (!order) return order;
@@ -255,12 +269,14 @@ const OperatorRoom: React.FC = () => {
   return (
     <>
       <Container>
+      {pause &&  <>
         <Row className="mt-3">
           <SearchOrders
             setCurrentOrder={handleSetCurrentOrder}
             currentUser={operator.email}
           />
         </Row>
+        
         <Row className="mt-4 mb-3">
           <Col>
             <Form.Group controlId="filterStatus">
@@ -387,6 +403,13 @@ const OperatorRoom: React.FC = () => {
               Confirm
             </Button>
           </Col>
+        </Row> </>}
+        <Row className="mt-3 justify-content-center">
+          <Button className="btn-light" onClick={() =>
+            {
+              handlePause();
+            }
+          }>Pause</Button>
         </Row>
         <Row className="mt-3 justify-content-center">
         <Alert variant="danger" show={error !== null}>

@@ -200,3 +200,45 @@ export const releaseOrder = async (orderId: string, country: Country): Promise<v
   });
 };
 
+
+
+// Get logs within a time interval for a specific user
+export const getArchiveOrdersByUserAndInterval = async (
+  user: string,
+  startTime: Date,
+  endTime: Date,
+  country: Country
+): Promise<SentOrder[]> => {
+  const archiveRef = collection(db, country === Country.MD ? FirebaseCollections.ArchiveMD : FirebaseCollections.Archive);
+  try {
+    let archivesQuery
+    if(user === "all"){
+      archivesQuery = query(
+        archiveRef,
+        where("updatedAt", ">=", startTime),
+        where("updatedAt", "<=", endTime)
+      );
+    }
+    else{
+    archivesQuery = query(
+      archiveRef,
+      where("assignedOperator", "==", user),
+      where("updatedAt", ">=", startTime),
+      where("updatedAt", "<=", endTime)
+    );
+  }
+
+    const archiveOrders: SentOrder[] = [];
+
+    const querySnapshot = await getDocs(archivesQuery);
+
+      querySnapshot.forEach((doc) => {
+        archiveOrders.push(doc.data() as SentOrder);
+      });
+
+    return archiveOrders;
+  } catch (e) {
+    console.error("Error fetching logs: " + e);
+    throw e;
+  }
+};

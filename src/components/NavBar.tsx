@@ -1,6 +1,6 @@
 // src/components/NavBar.tsx
 import React from 'react';
-import { Navbar, Nav, Container, Button, Form } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, Form, NavDropdown } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../services/authService';
 import { useData } from '../context/DataContext';
@@ -39,7 +39,11 @@ const NavBar: React.FC = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link onClick={() => navigate('/orders')}>Orders</Nav.Link>
-            {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/users')}>Users</Nav.Link>}
+            {currentUserRole == "admin" &&  <NavDropdown title="Users" id="basic-nav-dropdown">
+              {currentUserRole == "admin" &&  <NavDropdown.Item onClick={() => navigate('/users')}>Manage Users</NavDropdown.Item>}
+              {currentUserRole == "admin" &&  <NavDropdown.Item onClick={() => navigate('/operator-manager')}>Operator Manager</NavDropdown.Item>}
+            </NavDropdown>}
+            {/* {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/users')}>Users</Nav.Link>} */}
             {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/logs')}>Logs</Nav.Link>}
             {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/products')}>Products</Nav.Link>}
             {(currentUserRole == "admin" || currentUserRole == "operator") && <Nav.Link onClick={() => navigate('/operator')}>Room</Nav.Link>}
