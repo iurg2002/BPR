@@ -32,7 +32,7 @@ export const archiveOrder = async (order: Order, country: Country): Promise<void
   const archiveRef = collection(db, country === Country.MD ? FirebaseCollections.ArchiveMD : FirebaseCollections.Archive);
   // const archiveRef = collection(db, FirebaseCollections.Archive);
   const docRef = doc(archiveRef, order.orderId.toString());
-  await setDoc(docRef, order);
+  await setDoc(docRef, { ...order, updatedAt: new Date() });
 };
 
 
@@ -131,7 +131,7 @@ export const assignOrderToOperator = async (
     }
 
     const order = orderDoc.data() as Order;
-    if (order.status !== OrderStatus.Pending && order.status !== OrderStatus.CallLater) {
+    if (order.status !== OrderStatus.Pending && order.status !== OrderStatus.CallLater  && order.status !== OrderStatus.Cancelled) {
       throw new Error('Order is not available for assignment.');
     }
 
