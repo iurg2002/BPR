@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC = () => {
         // Find the user with the same email as the authenticated user
         const matchingUser = users.find((user) => user.email === authUser.email);
 
-        if (matchingUser && (matchingUser.role === "admin" || matchingUser.role === "operator")) {
+        if (matchingUser && (matchingUser.role === "admin" || matchingUser.role === "operator" || matchingUser.role === "packer")) {
           setAuthorized(true); // User is authorized
           console.log(matchingUser.role, "role authorized.");
         } else {

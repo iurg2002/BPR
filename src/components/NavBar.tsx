@@ -1,35 +1,72 @@
 // src/components/NavBar.tsx
-import React from 'react';
-import { Navbar, Nav, Container, Button, Form, NavDropdown } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { logoutUser } from '../services/authService';
-import { useData } from '../context/DataContext';
-import { Country } from '../models/Countries';
-import { OrderStatus } from '../models/OrderStatus';
+import React, { useEffect, useState } from "react";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Form,
+  NavDropdown,
+} from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../services/authService";
+import { useData } from "../context/DataContext";
+import { Country } from "../models/Countries";
+import { OrderStatus } from "../models/OrderStatus";
+import { addLog } from "../services/loggerService";
+import { LogActions } from "../models/LogModel";
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUserRole, country, updateCountry, orders, currentUser } = useData(); // Assuming updateCountry exists in context
+  const { currentUserRole, country, updateCountry, orders, currentUser, pause, setPause } =
+    useData(); // Assuming updateCountry exists in context
+
+  useEffect(() => {
+    console.log("Current Pause:", pause);
+  }, [pause]);
+
+  const handlePause = async () => {
+    try {
+      const currentOrder = orders.find(
+        (order) =>
+          currentUser &&
+          order.assignedOperator === currentUser.displayName &&
+          order.status === OrderStatus.InProgress
+      );
+      if (currentOrder) {
+        alert("Please release the current order before pausing.");
+        return;
+      }
+      if (currentUser) {
+        await addLog({ action: LogActions.Pause, user: currentUser.email });
+        setPause(!pause);
+      }
+    } catch (error) {
+      console.error("Error pausing operator:", error);
+    }
+  };
 
   const handleCountryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCountry = event.target.value as Country;
-  
+
     // Check if the current user has active orders
     const activeOrders = orders.filter(
-            (order) =>
-              currentUser && order.assignedOperator === currentUser.displayName &&
-              order.status === OrderStatus.InProgress
-          );
-  
+      (order) =>
+        currentUser &&
+        order.assignedOperator === currentUser.displayName &&
+        order.status === OrderStatus.InProgress
+    );
+
     if (activeOrders.length > 0) {
-      alert("Error: You have active orders. Please complete them before switching countries.");
+      alert(
+        "Error: You have active orders. Please complete them before switching countries."
+      );
       return; // Exit the function early if there are active orders
     }
-  
+
     // Update the country if there are no active orders
     updateCountry(selectedCountry);
   };
-  
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
@@ -38,31 +75,73 @@ const NavBar: React.FC = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link onClick={() => navigate('/orders')}>Orders</Nav.Link>
-            {currentUserRole == "admin" &&  <NavDropdown title="Users" id="basic-nav-dropdown">
-              {currentUserRole == "admin" &&  <NavDropdown.Item onClick={() => navigate('/users')}>Manage Users</NavDropdown.Item>}
-              {currentUserRole == "admin" &&  <NavDropdown.Item onClick={() => navigate('/operator-manager')}>Operator Manager</NavDropdown.Item>}
-            </NavDropdown>}
+            <Nav.Link onClick={() => navigate("/orders")}>Orders</Nav.Link>
+            {currentUserRole == "admin" && (
+              <NavDropdown title="Users" id="basic-nav-dropdown">
+                {currentUserRole == "admin" && (
+                  <NavDropdown.Item onClick={() => navigate("/users")}>
+                    Manage Users
+                  </NavDropdown.Item>
+                )}
+                {currentUserRole == "admin" && (
+                  <NavDropdown.Item
+                    onClick={() => navigate("/operator-manager")}
+                  >
+                    Operator Manager
+                  </NavDropdown.Item>
+                )}
+              </NavDropdown>
+            )}
             {/* {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/users')}>Users</Nav.Link>} */}
-            {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/logs')}>Logs</Nav.Link>}
-            {currentUserRole == "admin" && <Nav.Link onClick={() => navigate('/products')}>Products</Nav.Link>}
-            {(currentUserRole == "admin" || currentUserRole == "operator") && <Nav.Link onClick={() => navigate('/operator')}>Room</Nav.Link>}
-            {(currentUserRole == "admin" || currentUserRole == "operator") && <Nav.Link onClick={() => navigate('/create-order')}>Create Order</Nav.Link>}
-            {(currentUserRole == "admin" || currentUserRole == "packer") && <Nav.Link onClick={() => navigate('/scanner')}>Scanner</Nav.Link>}
-            <Nav.Link onClick={() => navigate('/search-archive')}>Archive</Nav.Link>
+            {currentUserRole == "admin" && (
+              <Nav.Link onClick={() => navigate("/logs")}>Logs</Nav.Link>
+            )}
+            {currentUserRole == "admin" && (
+              <Nav.Link onClick={() => navigate("/products")}>
+                Products
+              </Nav.Link>
+            )}
+            {(currentUserRole == "admin" || currentUserRole == "operator") && (
+              <Nav.Link onClick={() => navigate("/operator")}>Room</Nav.Link>
+            )}
+            {(currentUserRole == "admin" || currentUserRole == "operator") && (
+              <Nav.Link onClick={() => navigate("/create-order")}>
+                Create Order
+              </Nav.Link>
+            )}
+            {(currentUserRole == "admin" || currentUserRole == "packer") && (
+              <Nav.Link onClick={() => navigate("/scanner")}>Scanner</Nav.Link>
+            )}
+            <Nav.Link onClick={() => navigate("/search-archive")}>
+              Archive
+            </Nav.Link>
           </Nav>
+          <Form>
+            <Form.Check
+              type="switch"
+              id="custom-switch"
+              label="Pause"
+              checked={pause}
+              onChange={handlePause}
+              style={{ marginRight: "20px", color: "white" }}
+            />
+          </Form>
           <Form.Select
             className="me-2"
             value={country}
             onChange={handleCountryChange}
-            style={{ width: '150px' }}
+            style={{ width: "150px" }}
           >
             <option value={Country.RO}>Romania</option>
             <option value={Country.MD}>Moldova</option>
           </Form.Select>
-          <Button variant="outline-light" onClick={() => {logoutUser()
-            navigate('/')
-          }}>
+          <Button
+            variant="outline-light"
+            onClick={() => {
+              logoutUser();
+              navigate("/");
+            }}
+          >
             Logout
           </Button>
         </Navbar.Collapse>

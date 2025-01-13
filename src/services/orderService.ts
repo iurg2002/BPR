@@ -39,7 +39,7 @@ export const archiveOrder = async (order: Order, country: Country): Promise<void
 export const getOrderFromArchiveByAWB = async (awb: string, country: Country): Promise<Order | null> => {
   const archiveRef = collection(db, country === Country.MD ? FirebaseCollections.ArchiveMD : FirebaseCollections.Archive);
   // const archiveRef = collection(db, FirebaseCollections.Archive);
-  const q = query(archiveRef, where("AWB", "==", awb));
+  const q = query(archiveRef, where("awb", "==", awb));
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {

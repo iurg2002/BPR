@@ -39,7 +39,9 @@ const Scanner = () => {
   // Function to check the Firestore archive collection
   const checkOrderInArchive = async (awb: string) => {
     try {
-      const orderData = await getOrderFromArchiveByAWB(awb, country);
+      let slicedAwb = awb.slice(0, -1).slice(1);
+      setScannedValue(slicedAwb); // Update the scanned value with the sliced AWB
+      const orderData = await getOrderFromArchiveByAWB(slicedAwb.toString(), country);
 
       if (orderData) {
         setOrder(orderData);

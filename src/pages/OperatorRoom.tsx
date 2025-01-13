@@ -35,12 +35,11 @@ import { arch } from "os";
 
 
 const OperatorRoom: React.FC = () => {
-  const { orders, products, currentUser, loading, users, country } = useData(); // Access the data context
+  const { orders, products, currentUser, loading, users, country, pause } = useData(); // Access the data context
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [callCountFilter, setCallCountFilter] = useState<number | "">("");
   const [error, setError] = useState<string | null>(null);
-  const [pause, setPause] = useState(false);
 
   const filteredOrders = orders.filter((order) => {
       const matchesType = typeFilter ? order.type === typeFilter : true;
@@ -131,21 +130,11 @@ const OperatorRoom: React.FC = () => {
     }
   };
 
-  const handlePause = async () => {
-    try{
-      if(currentOrder){
-        setError("Please release the current order before pausing.");
-        return;
-      }
-      await addLog({ action: LogActions.Pause, user: operator.email });
-      setPause(!pause);
-    } catch (error) {
-      console.error("Error pausing operator:", error);
-    }
-  }
 
   const validateAndSetOrder = (order: Order | null) => {
     if (!order) return order;
+  
+    console.log("Unvalidated order:", order);
   
     if (order.products && order.products.length > 0) {
       const updatedProducts = order.products.map((product, index) => {
@@ -154,11 +143,13 @@ const OperatorRoom: React.FC = () => {
         // Ensure each product has a unique instanceId
         const instanceId = product.instanceId || `${Date.now()}-${index}`;
   
+        // Merge foundProduct with original product to retain personalization
         return foundProduct
-          ? { ...foundProduct, instanceId } // Use the found product and add instanceId
-          : { ...product, instanceId }; // Keep original product and add instanceId
+          ? { ...foundProduct, ...product, instanceId } // Retain personalized fields
+          : { ...product, instanceId }; // Keep original product if not found
       });
   
+      console.log("Validated order:", { ...order, products: updatedProducts });
       return { ...order, products: updatedProducts };
     }
   
@@ -166,11 +157,13 @@ const OperatorRoom: React.FC = () => {
   };
   
   
+  
 
   // Save changes to the order
   const saveOrder = async () => {
     if (currentOrder) {
       try {
+        console.log("Saving order:", currentOrder.products);
         await updateOrder(currentOrder.id, { ...currentOrder, totalPrice }, country);
         await addLog({ action: LogActions.Save, user: operator.email });
         setError(null);
@@ -269,7 +262,7 @@ const OperatorRoom: React.FC = () => {
   return (
     <>
       <Container>
-      {pause &&  <>
+        {pause == false && <>
         <Row className="mt-3">
           <SearchOrders
             setCurrentOrder={handleSetCurrentOrder}
@@ -403,14 +396,7 @@ const OperatorRoom: React.FC = () => {
               Confirm
             </Button>
           </Col>
-        </Row> </>}
-        <Row className="mt-3 justify-content-center">
-          <Button className="btn-light" onClick={() =>
-            {
-              handlePause();
-            }
-          }>Pause</Button>
-        </Row>
+        </Row> 
         <Row className="mt-3 justify-content-center">
         <Alert variant="danger" show={error !== null}>
           {error}
@@ -444,8 +430,10 @@ const OperatorRoom: React.FC = () => {
           </tbody>
         </Table>
         </Row>
+        </>
+        }
       </Container>
-    </>
+    </>  
   );
 };
 

@@ -17,6 +17,8 @@ interface DataContextType {
   country: Country;
   updateCountry: (newCountry: Country) => void;
   loading: boolean;
+  pause: boolean;
+  setPause: (pause: boolean) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<"admin" | "operator" | "packer" | null>(null);
   const [authUser, loading] = useAuthState(auth);
+  const [pause, setPause] = useState(false);
 
   useEffect(() => {
     if (!loading && authUser) {
@@ -102,7 +105,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   return (
-    <DataContext.Provider value={{ users, products, orders, country, updateCountry, currentUser, currentUserRole, loading}}>
+    <DataContext.Provider value={{ users, products, orders, country, updateCountry, currentUser, currentUserRole, loading, pause, setPause }}>
       {children}
     </DataContext.Provider>
   );
