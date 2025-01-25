@@ -23,6 +23,7 @@ const OperatorManager: React.FC = () => {
   useEffect(() => {
     const groupedData = groupSentOrders(SentOrders);
     setGroupedData(groupedData);
+    console.log('Grouped data:', groupedData);
     }, [SentOrders]);
 
   useEffect(() => {
@@ -105,6 +106,15 @@ const OperatorManager: React.FC = () => {
     deliveredOrders: number; // Orders with awbStatus "delivered"
     upsellTotal: number; // Total upsell amount
     upsellAvg: number; // Total upsell amount
+    upsellCount: number; // Total upsell amount
+    upsellProcent: number; // Total upsell procent amount
+    crossSellTotal: number; // Total upsell amount
+    crossSellAvg: number; // Total upsell amount
+    crossSellCount: number; // Total upsell amount
+    crossSellProdAmount: number; // Total upsell amount
+    crossSellProcent: number; // Total upsell procent amount
+    extraSellCount: number; // Total upsell amount
+    extraSellProcents: number; // Total upsell procent amount
   };
   
   function groupSentOrders(orders: SentOrder[]): GroupedData[] {
@@ -112,7 +122,9 @@ const OperatorManager: React.FC = () => {
     const groupedData = new Map<string, GroupedData>();
   
     orders.forEach((order) => {
-      const date = new Date(formatFirestoreTimestampToDate(order.updatedAt)).toLocaleString().split(', ')[0]; // Extract date from updatedAt
+      const date = formatFirestoreTimestampToDate(order.updatedAt).split(' ')[0]; // Extract date from updatedAt
+      console.log('Raw updatedAt:', order.updatedAt);
+      console.log('Formatted date:', formatFirestoreTimestampToDate(order.updatedAt));
       const operator = order.assignedOperator || 'Unassigned';
       const key = `${date}_${operator}`;
   
@@ -124,6 +136,15 @@ const OperatorManager: React.FC = () => {
           deliveredOrders: 0,
           upsellTotal: 0,
           upsellAvg: 0,
+          upsellCount: 0,
+          upsellProcent: 0,
+          crossSellTotal: 0,
+          crossSellAvg: 0,
+          crossSellCount: 0,
+          crossSellProdAmount: 0,
+          crossSellProcent: 0,
+          extraSellCount: 0,
+          extraSellProcents: 0,
         });
       }
   
@@ -132,8 +153,9 @@ const OperatorManager: React.FC = () => {
       if (order.awbStatus === 'delivered') {
         current.deliveredOrders += 1;
       }
-
-      current.upsellTotal += order.products.reduce((total, product) => 
+      
+      // count upsell total
+      let orderUpsell = order.products.reduce((total, product) => 
         {
             if(product.upsell){
             total += parseInt(product?.upsell.toString())
@@ -141,7 +163,66 @@ const OperatorManager: React.FC = () => {
 
             return total;
         }, 0);
+      current.upsellTotal += orderUpsell
+        // count upsell average
         current.upsellAvg = parseInt((current.upsellTotal / current.ordersInArchive).toFixed(4));
+
+        // count upsell Count
+        if(orderUpsell > 0){current.upsellCount += 1;}
+
+        // count upsell procent
+        current.upsellProcent = parseInt(((current.upsellCount / current.ordersInArchive) * 100).toFixed(2));
+
+        // count cross sell total
+        current.crossSellTotal += order.products.reduce((total, product, index) => 
+        {
+          if(index > 0){
+            if(product.price){
+              if(!product.productId.includes('cutie') && !product.productId.includes('garantie')){
+            total += parseInt(product?.price.toString())
+            }}
+        }
+
+            return total;
+        }, 0);
+
+        // count cross sell average
+        current.crossSellAvg = parseInt((current.crossSellTotal / current.ordersInArchive).toFixed(4));
+
+        // count cross sell Count
+        let orderCrossSellsCount = order.products.reduce((total, product, index) => 
+          {
+            if(index > 0){
+              if(product.price){
+                if(!product.productId.includes('cutie') && !product.productId.includes('garantie')){
+              total += 1
+              }}
+          }
+              return total;
+          }, 0);
+
+        if(orderCrossSellsCount > 0){current.crossSellCount += 1;}
+
+        // current.crossSellCount += orderCrossSellsCount
+
+        // count cross sell product amount
+        // current.crossSellProdAmount += order.products.length - 1;
+
+        // count cross sell procent
+        current.crossSellProcent = parseInt(((current.crossSellCount / current.ordersInArchive) * 100).toFixed(2));
+
+        // count extra sell count (cross sell or upsell)
+    
+
+        if(orderCrossSellsCount > 0 || orderUpsell > 0){
+          current.extraSellCount += 1;
+        }
+
+        // count extra sell procent
+        current.extraSellProcents = parseInt(((current.extraSellCount / current.ordersInArchive) * 100).toFixed(2));
+
+
+
     });
   
     return Array.from(groupedData.values());
@@ -206,6 +287,15 @@ const OperatorManager: React.FC = () => {
                 <th>Delivered</th>
                 <th>Upsell Total</th>
                 <th>Upsell Avg</th>
+                <th>Upsell Count</th>
+                <th>Upsell Procent</th>
+                <th>Cross Sell Total</th>
+                <th>Cross Sell Avg</th>
+                <th>Cross Sell Count</th>
+                {/* <th>Cross Sell Product Amount</th> */}
+                <th>Cross Sell Procent</th>
+                <th>Extra Sell Count</th>
+                <th>Extra Sell Procent</th>
               </tr>
             </thead>
             <tbody>
@@ -217,6 +307,15 @@ const OperatorManager: React.FC = () => {
                   <td>{log.deliveredOrders}</td>
                 <td>{log.upsellTotal}</td>
                 <td>{log.upsellAvg}</td>
+                <td>{log.upsellCount}</td>
+                <td>{log.upsellProcent}%</td>
+                <td>{log.crossSellTotal}</td>
+                <td>{log.crossSellAvg}</td>
+                <td>{log.crossSellCount}</td>
+                {/* <td>{log.crossSellProdAmount}</td> */}
+                <td>{log.crossSellProcent}%</td>
+                <td>{log.extraSellCount}</td>
+                <td>{log.extraSellProcents}%</td>
                 </tr>
               ))}
             </tbody>

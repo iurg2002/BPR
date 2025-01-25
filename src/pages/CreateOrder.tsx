@@ -95,7 +95,7 @@ const CreateOrder: React.FC = () => {
         console.log("Saving order:", newOrder);
         // Proceed with saving logic (e.g., Firestore integration)
         if(newOrder == null) throw new Error("No order selected.");
-        await addOrder(newOrder.id, newOrder, country);
+        await addOrder(newOrder.id,{ ...newOrder, totalPrice }, country);
         setNewOrder(null);
       } catch (error) {
         console.error("Error saving order:", error);

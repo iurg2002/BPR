@@ -50,7 +50,7 @@ export interface Order {
     deliveryPrice: number;
     deliveryDate: Timestamp | null;
     totalPrice: number;
-    AWB: string;
+    awb: string;
     updatedAt: Date;
     awbStatus: 'delivered' | 'returned' | 'in_progress' | null;
   }

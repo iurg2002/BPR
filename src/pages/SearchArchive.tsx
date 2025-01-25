@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { getOrdersFromArchiveByPhone } from "../services/orderService";
-import { Table, Form, Button, Alert, Container } from "react-bootstrap";
+import { Table, Form, Button, Alert, Container, Card } from "react-bootstrap";
 import { Order, SentOrder } from "../models/Order";
 import { formatFirestoreTimestampToDate } from "../utils/Utils";
 import { useData } from "../context/DataContext";
@@ -55,34 +55,37 @@ const SearchArchive: React.FC = () => {
 
       {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
 
-      {orders.length > 0 && (
-        <Table striped bordered hover className="mt-4">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Order Time</th>
-              <th>Total Price</th>
-              <th>AWB</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td>{order.orderId}</td>
-                <td>{order.name}</td>
-                <td>{order.phone}</td>
-                <td>{order.status}</td>
-                <td>{formatFirestoreTimestampToDate(order.orderTime)}</td>
-                <td>{order.totalPrice}</td>
-                <td>{order.AWB}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+      <div className="mt-4">
+      {orders.length > 0 ? (
+        <div className="d-flex flex-wrap justify-content-around">
+          {orders.map((order) => (
+            <Card key={order.id} style={{ width: '18rem', margin: '10px' }}>
+              <Card.Body>
+                <Card.Title>Order ID: {order.orderId}</Card.Title>
+                <Card.Text>
+                  <strong>Name:</strong> {order.name} <br />
+                  <strong>Phone:</strong> {order.phone} <br />
+                  <strong>Status:</strong> {order.status} <br />
+                  <strong>Order Time:</strong> {formatFirestoreTimestampToDate(order.orderTime)} <br />
+                  <strong>Total Price:</strong> {order.totalPrice}<br />
+                  <strong>AWB:</strong> {order.awb} <br />
+                  <strong>AWB Status:</strong> {order.awbStatus} <br />
+                  <strong>Assigned Operator:</strong> {order.assignedOperator || 'N/A'} <br />
+                  <strong>Call Count:</strong> {order.callCount} <br />
+                  <strong>Comment:</strong> {order.comment || 'No comments'} <br />
+                  <strong>Discount:</strong> {order.discount} <br />
+                  <strong>Delivery Price:</strong> {order.deliveryPrice}<br />
+                  <strong>Address:</strong> {order.address.state + ', ' + order.address.locality + ', ' + order.address.street} <br />
+                  <strong>AWB Status:</strong> {order.awbStatus || 'N/A'} <br />
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <p>No orders available.</p>
       )}
+    </div>
     </Container>
   );
 };
